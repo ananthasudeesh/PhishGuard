@@ -1,0 +1,10 @@
+From: "Microsoft 365" <security@micros0ft-login.example>
+To: employee@example.com
+Subject: Action required: password expires today
+Date: Tue, 10 Nov 2026 11:00:00 +0000
+Message-ID: <m365@micros0ft-login.example>
+Authentication-Results: mx.example; spf=softfail; dkim=fail; dmarc=fail
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Your password expires today. Sign in at http://micros0ft-login.example/verify to keep access.

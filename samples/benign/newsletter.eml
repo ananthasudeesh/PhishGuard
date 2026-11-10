@@ -1,0 +1,15 @@
+From: PhishGuard Team <hello@phishguard.example>
+To: student@example.com
+Subject: Welcome to the PhishGuard beta
+Date: Tue, 10 Nov 2026 09:00:00 +0000
+Message-ID: <welcome@phishguard.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hi,
+
+Thanks for trying PhishGuard. This is a synthetic benign sample used for testing.
+
+Read the docs, try the URL tab, and report any false positives.
+
+— The PhishGuard team
