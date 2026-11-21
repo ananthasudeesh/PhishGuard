@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from phishguard.analyzers.url import analyze_url
 from phishguard.models import Verdict
 from phishguard.utils import extract_urls, registered_domain
@@ -57,3 +58,75 @@ def test_valid_https_port_is_accepted():
     result = analyze_url("https://example.com:443", online=False)
 
     assert result.error is None
+
+from unittest.mock import patch
+from phishguard.utils import resolve_public_ips
+
+
+def test_dns_public_ip_allowed():
+    with patch("phishguard.utils.dns.resolver.Resolver") as resolver:
+        resolver.return_value.resolve.side_effect = (
+            lambda host, record_type:
+            ["8.8.8.8"] if record_type == "A" else []
+        )
+        assert resolve_public_ips("test.example.com") == ["8.8.8.8"]
+
+
+def test_dns_private_ip_blocked():
+    with patch("phishguard.utils.dns.resolver.Resolver") as resolver:
+        resolver.return_value.resolve.side_effect = (
+            lambda host, record_type:
+            ["192.168.1.10"] if record_type == "A" else []
+        )
+        assert resolve_public_ips("test.example.com") == []
+
+
+def test_dns_mixed_ips_blocked():
+    with patch("phishguard.utils.dns.resolver.Resolver") as resolver:
+        resolver.return_value.resolve.side_effect = (
+            lambda host, record_type:
+            ["8.8.8.8", "127.0.0.1"] if record_type == "A" else []
+        )
+        assert resolve_public_ips("test.example.com") == []
+
+
+def test_dns_ipv6_localhost_blocked():
+    with patch("phishguard.utils.dns.resolver.Resolver") as resolver:
+        resolver.return_value.resolve.side_effect = (
+            lambda host, record_type:
+            ["::1"] if record_type == "AAAA" else []
+        )
+        assert resolve_public_ips("test.example.com") == []
+
+def test_tls_does_not_connect_when_ip_rejected():
+    from phishguard.utils import tls_certificate
+
+    with patch(
+        "phishguard.utils.resolve_public_ips",
+        return_value=[]
+    ), patch(
+        "phishguard.utils.socket.create_connection"
+    ) as connection:
+        result = tls_certificate("internal.example.com")
+
+    assert result["ok"] is False
+    connection.assert_not_called()
+
+
+def test_tls_uses_validated_public_ip():
+    from phishguard.utils import tls_certificate
+
+    with patch(
+        "phishguard.utils.resolve_public_ips",
+        return_value=["8.8.8.8"]
+    ), patch(
+        "phishguard.utils.socket.create_connection",
+        side_effect=OSError("Simulated connection failure")
+    ) as connection:
+        result = tls_certificate("example.com")
+
+    connection.assert_called_once_with(
+        ("8.8.8.8", 443),
+        timeout=4
+    )
+    assert result["ok"] is False
