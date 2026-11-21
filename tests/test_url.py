@@ -36,3 +36,24 @@ def test_extract_urls_deduplicates_scheme_variants():
 def test_registered_domain():
     assert registered_domain("https://login.paypal.com.evil.com/path") == "evil.com"
     assert registered_domain("https://www.google.co.in") == "google.co.in"
+
+def test_invalid_text_port_returns_controlled_error():
+    result = analyze_url("https://example.com:abc", online=False)
+
+    assert result.error is not None
+    assert "Invalid URL" in result.error
+    assert result.verdict is Verdict.UNKNOWN
+
+
+def test_out_of_range_port_returns_controlled_error():
+    result = analyze_url("https://example.com:99999", online=False)
+
+    assert result.error is not None
+    assert "Invalid URL" in result.error
+    assert result.verdict is Verdict.UNKNOWN
+
+
+def test_valid_https_port_is_accepted():
+    result = analyze_url("https://example.com:443", online=False)
+
+    assert result.error is None

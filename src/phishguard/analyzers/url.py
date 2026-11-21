@@ -48,10 +48,12 @@ def analyze_url(
         result.error = "No URL supplied"
         return finalize(result)
 
+
     try:
         normalized = normalize_url(target)
         parsed = urlsplit(normalized)
         host = (parsed.hostname or "").lower().rstrip(".")
+        port = parsed.port
     except ValueError as exc:
         result.error = f"Invalid URL: {exc}"
         return finalize(result)
@@ -81,7 +83,7 @@ def analyze_url(
             "scheme": parsed.scheme.lower(),
             "host": host,
             "registered_domain": registrable,
-            "port": parsed.port,
+            "port": port,
             "path": safe_truncate(parsed.path, 300),
             "query": safe_truncate(parsed.query, 300),
             "ip_literal": is_ip_address(host),
