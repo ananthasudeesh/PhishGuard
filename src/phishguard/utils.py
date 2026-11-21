@@ -283,7 +283,7 @@ def rdap_domain_age_days(domain: str) -> int | None:
             f"https://rdap.org/domain/{domain}",
             timeout=6,
             headers={"User-Agent": USER_AGENT, "Accept": "application/rdap+json"},
-            allow_redirects=True,
+            allow_redirects=False,
         )
         if response.status_code != 200:
             return None

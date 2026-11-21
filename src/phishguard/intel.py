@@ -98,7 +98,13 @@ class IntelClient:
         if headers:
             merged.update(headers)
         try:
-            return requests.get(url, headers=merged, params=params, timeout=7)
+           return requests.get(
+               url,
+               headers=merged,
+               params=params,
+               timeout=7,
+               allow_redirects=False,
+)
         except requests.RequestException:
             return None
 
@@ -252,6 +258,7 @@ class IntelClient:
                 json=payload,
                 headers={"User-Agent": USER_AGENT},
                 timeout=7,
+                allow_redirects=False,
             )
         except requests.RequestException:
             return _cache_set(key, IntelResult(source="Google Safe Browsing", error="Request failed"))

@@ -130,3 +130,59 @@ def test_tls_uses_validated_public_ip():
         timeout=4
     )
     assert result["ok"] is False
+def test_rdap_disables_automatic_redirects():
+    from unittest.mock import Mock, patch
+    from phishguard.utils import rdap_domain_age_days
+
+    response = Mock()
+    response.status_code = 302
+
+    rdap_domain_age_days.cache_clear()
+
+    with patch(
+        "phishguard.utils.requests.get",
+        return_value=response,
+    ) as mock_get:
+        result = rdap_domain_age_days("example.com")
+
+    assert result is None
+    assert mock_get.call_args.kwargs["allow_redirects"] is False
+
+    rdap_domain_age_days.cache_clear()
+def test_intel_get_disables_automatic_redirects():
+    from unittest.mock import Mock, patch
+    from phishguard.intel import IntelClient
+
+    response = Mock()
+    response.status_code = 302
+
+    client = IntelClient()
+
+    with patch(
+        "phishguard.intel.requests.get",
+        return_value=response,
+    ) as mock_get:
+        result = client._get("https://example.com/api")
+
+    assert result is response
+    assert mock_get.call_args.kwargs["allow_redirects"] is False
+def test_google_safe_browsing_disables_redirects():
+    from unittest.mock import Mock, patch
+    from phishguard.intel import IntelClient
+
+    client = IntelClient(safe_browsing_key="fake-test-key")
+
+    response = Mock()
+    response.status_code = 302
+
+    with patch(
+        "phishguard.intel.requests.post",
+        return_value=response,
+    ) as mock_post:
+        result = client.google_safe_browsing(
+            "https://example.com"
+        )
+
+    assert result.source == "Google Safe Browsing"
+    assert result.error == "HTTP 302"
+    assert mock_post.call_args.kwargs["allow_redirects"] is False
