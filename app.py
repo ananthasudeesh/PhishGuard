@@ -168,7 +168,7 @@ def render_result(result: AnalysisResult, key: str) -> None:
             }
             for signal in result.signals
         ]
-        st.dataframe(rows, use_container_width=True, hide_index=True)
+        st.dataframe(rows, width="stretch", hide_index=True)
 
     if result.recommendations:
         st.markdown("**Recommended actions**")
