@@ -35,3 +35,25 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
+# Backend temporary files
+*.bak
+*.backup
+__pycache__/
+*.pyc
+
+# Frontend dependencies and build
+node_modules/
+dist/
+.vite/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Generated test files
+test_qr.png
+
+# Temporary files
+*.log
+*.tmp
